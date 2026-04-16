@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+import os
 
 
 
@@ -8,11 +9,18 @@ CORS(app)
 
 @app.route("/")
 def home():
+    products = [
+        {"id": 1, "name": "Teclado Mecanico", "price": 299.90},
+        {"id": 2, "name": "Mouse Gamer", "price": 159.90},
+        {"id": 3, "name": "Headset", "price": 219.90}
+    ]
+
     return jsonify({
         "service": "backend3",
-        "description": "API de usuários",
+        "description": "API de produtos",
         "status": "ok",
-        "content": "Oii, sou o backend3"
+        "environment": os.getenv("BACKEND3_ENV", "dev"),
+        "items": products
     })
 @app.route("/health")
 def health():

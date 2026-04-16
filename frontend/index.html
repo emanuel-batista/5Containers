@@ -1,110 +1,374 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Docker</title>
+    <title>Painel de Serviços Minimalista</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap');
+
+        :root {
+            --bg: #fafafa;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --accent: #111827;
+            --accent-hover: #374151;
+            --success: #059669;
+            --success-bg: #d1fae5;
+            --error: #dc2626;
+            --error-bg: #fee2e2;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f4f6f8;
+            font-family: var(--font-sans);
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
         }
 
         h1 {
-            color: #1f4e78;
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        button {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        button:hover {
+            border-color: var(--text-muted);
+            background-color: var(--bg);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: white;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
         }
 
         .card {
-            background: white;
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        button {
-            padding: 10px 14px;
-            border: none;
-            background: #2f75b5;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+            transform: translateY(-2px);
         }
 
-        pre {
-            white-space: pre-wrap;
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fdfdfd;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge.idle { background: #f3f4f6; color: var(--text-muted); border: 1px solid var(--border); }
+        .badge.loading { background: var(--warning-bg); color: var(--warning); border: 1px solid #fcd34d; }
+        .badge.success { background: var(--success-bg); color: var(--success); border: 1px solid #6ee7b7; }
+        .badge.error { background: var(--error-bg); color: var(--error); border: 1px solid #fca5a5; }
+
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            background: #ffffff;
+        }
+
+        .card-footer {
+            padding: 1rem 1.5rem;
+            background-color: #fdfdfd;
+            border-top: 1px solid var(--border);
+        }
+        
+        .card-footer button {
+            width: 100%;
+        }
+
+        /* Value render styling */
+        .data-view {
+            font-family: var(--font-sans);
+        }
+        
+        .data-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+        
+        .data-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .data-key {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .data-value {
+            color: var(--text-main);
+            font-weight: 500;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+        
+        .data-value.number {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            background: #f3f4f6;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .data-value.boolean {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        
+        .data-value.string {
+            color: var(--text-main);
+        }
+
+        .data-array {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .data-array-item {
+            background-color: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            body { padding: 1.5rem 1rem; }
         }
     </style>
 </head>
-
 <body>
-    <h1>Projeto Docker Compose</h1>
-    <p>Clique nos botões para consultar cada backend.</p>
-    <div class="grid">
-        <div class="card"><button onclick="loadApi(1)">Backend
-                1</button>
-            <pre id="r1"></pre>
-        </div>
-        <div class="card"><button onclick="loadApi(2)">Backend
-                2</button>
-            <pre id="r2"></pre>
-        </div>
-        <div class="card"><button onclick="loadApi(3)">Backend
-                3</button>
-            <pre id="r3"></pre>
-        </div>
-        <div class="card"><button onclick="loadApi(4)">Backend
-                4</button>
-            <pre id="r4"></pre>
-        </div>
-        <div class="card"><button onclick="loadApi(5)">Backend
-                5</button>
-            <pre id="r5"></pre>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Painel de Serviços</h1>
+                <p class="subtitle">Monitoramento elegante das APIs do Docker.</p>
+            </div>
+            <button class="btn-primary" onclick="loadAllApis()">Atualizar Todos</button>
+        </header>
+
+        <div class="grid" id="services-grid">
         </div>
     </div>
+
     <script>
         const backendPorts = [5001, 5002, 5003, 5004, 5005];
 
         function resolveBackendUrl(port) {
             const { hostname, protocol } = window.location;
-
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
                 return `http://localhost:${port}/`;
             }
-
             const codespacesMatch = hostname.match(/^(.*)-(\d+)\.app\.github\.dev$/);
             if (codespacesMatch) {
                 const workspaceSlug = codespacesMatch[1];
                 return `${protocol}//${workspaceSlug}-${port}.app.github.dev/`;
             }
-
             return `${protocol}//localhost:${port}/`;
+        }
+
+        function createCards() {
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = '';
+            
+            backendPorts.forEach((port, idx) => {
+                const index = idx + 1;
+                const cardHtml = `
+                    <div class="card" id="card-${index}">
+                        <div class="card-header">
+                            <h2 class="card-title">Backend ${index}</h2>
+                            <span id="badge-${index}" class="badge idle">pronto</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="content-${index}" class="data-view">
+                                <span style="color: var(--text-muted); font-size: 0.875rem; font-style: italic;">Aguardando dados...</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button onclick="loadApi(${index})">Atualizar Serviço</button>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        function setStatus(index, state, text) {
+            const badge = document.getElementById(`badge-${index}`);
+            badge.className = `badge ${state}`;
+            badge.textContent = text;
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function renderData(data) {
+            if (typeof data !== 'object' || data === null) {
+                return `<div class="data-value">${escapeHTML(data)}</div>`;
+            }
+
+            let html = '<div class="data-container">';
+            for (const [key, value] of Object.entries(data)) {
+                html += `<div class="data-row">`;
+                html += `<div class="data-key">${escapeHTML(key)}</div>`;
+                
+                if (Array.isArray(value)) {
+                    html += `<div class="data-array">`;
+                    value.forEach(item => {
+                        html += `<div class="data-array-item">${renderData(item)}</div>`;
+                    });
+                    html += `</div>`;
+                } else if (typeof value === 'object' && value !== null) {
+                    html += `<div style="padding-left: 0.75rem; border-left: 2px solid var(--border); margin-top: 0.25rem;">${renderData(value)}</div>`;
+                } else {
+                    const typeClass = typeof value;
+                    html += `<div class="data-value ${typeClass}">${escapeHTML(value)}</div>`;
+                }
+                html += `</div>`;
+            }
+            html += '</div>';
+            return html;
         }
 
         async function loadApi(index) {
             const port = backendPorts[index - 1];
             const url = resolveBackendUrl(port);
-            const target = document.getElementById(`r${index}`);
-            target.textContent = 'Carregando...';
+            const target = document.getElementById(`content-${index}`);
+
+            setStatus(index, 'loading', 'buscando');
+            target.innerHTML = '<span style="color: var(--text-muted); font-size: 0.875rem; font-style: italic;">Buscando dados...</span>';
+
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
+
                 const data = await response.json();
-                target.textContent = JSON.stringify(data, null, 2);
+                target.innerHTML = renderData(data);
+                setStatus(index, 'success', 'online');
             } catch (error) {
-                target.textContent = 'Erro ao acessar a API: ' + error;
+                target.innerHTML = `<span style="color: var(--error);">${escapeHTML(error)}</span>`;
+                setStatus(index, 'error', 'erro');
             }
         }
+
+        function loadAllApis() {
+            backendPorts.forEach((_, idx) => {
+                const index = idx + 1;
+                setTimeout(() => loadApi(index), index * 100);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            createCards();
+            loadAllApis();
+        });
     </script>
 </body>
-
 </html>

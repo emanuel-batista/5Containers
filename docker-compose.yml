@@ -13,6 +13,8 @@ services:
   backend3:
     build: ./backend3
     container_name: backend3
+    environment:
+    - BACKEND3_ENV=production
     ports:
     - "5003:5000"
   backend4:

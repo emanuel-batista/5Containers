@@ -9,7 +9,8 @@ def home():
     return jsonify({
         "service": "backend1",
         "description": "API de usuários",
-        "status": "ok"
+        "status": "ok",
+        "content": "Oii, sou o backend1"
     })
 @app.route("/health")
 def health():
