@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Docker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f4f6f8;
+        }
+
+        h1 {
+            color: #1f4e78;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+        }
+
+        button {
+            padding: 10px 14px;
+            border: none;
+            background: #2f75b5;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        pre {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Projeto Docker Compose</h1>
+    <p>Clique nos botões para consultar cada backend.</p>
+    <div class="grid">
+        <div class="card"><button onclick="loadApi(1)">Backend
+                1</button>
+            <pre id="r1"></pre>
+        </div>
+        <div class="card"><button onclick="loadApi(2)">Backend
+                2</button>
+            <pre id="r2"></pre>
+        </div>
+        <div class="card"><button onclick="loadApi(3)">Backend
+                3</button>
+            <pre id="r3"></pre>
+        </div>
+        <div class="card"><button onclick="loadApi(4)">Backend
+                4</button>
+            <pre id="r4"></pre>
+        </div>
+        <div class="card"><button onclick="loadApi(5)">Backend
+                5</button>
+            <pre id="r5"></pre>
+        </div>
+    </div>
+    <script>
+        const backendPorts = [5001, 5002, 5003, 5004, 5005];
+
+        function resolveBackendUrl(port) {
+            const { hostname, protocol } = window.location;
+
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `http://localhost:${port}/`;
+            }
+
+            const codespacesMatch = hostname.match(/^(.*)-(\d+)\.app\.github\.dev$/);
+            if (codespacesMatch) {
+                const workspaceSlug = codespacesMatch[1];
+                return `${protocol}//${workspaceSlug}-${port}.app.github.dev/`;
+            }
+
+            return `${protocol}//localhost:${port}/`;
+        }
+
+        async function loadApi(index) {
+            const port = backendPorts[index - 1];
+            const url = resolveBackendUrl(port);
+            const target = document.getElementById(`r${index}`);
+            target.textContent = 'Carregando...';
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                target.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                target.textContent = 'Erro ao acessar a API: ' + error;
+            }
+        }
+    </script>
+</body>
+
+</html>
